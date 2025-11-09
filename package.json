@@ -1,18 +1,16 @@
 {
   "name": "rastreador-whatsapp-v2",
   "version": "1.0.0",
-  "description": "Rastreador de pedidos via WhatsApp",
   "main": "rastreador.js",
+  "type": "module",
   "scripts": {
     "start": "node rastreador.js"
   },
   "dependencies": {
-    "whatsapp-web.js": "^1.19.0",
-    "qrcode-terminal": "^0.12.0",
-    "axios": "^1.7.0",
-    "puppeteer": "^21.3.0"
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.0.0"
   }
 }
