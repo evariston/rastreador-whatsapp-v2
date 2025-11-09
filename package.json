@@ -4,15 +4,17 @@
   "description": "Rastreador WhatsApp com QR Code pequeno e autenticação otimizada.",
   "main": "rastreador.js",
   "scripts": {
-    "start": "node rastreador.js"
+    "start": "node rastreador.js",
+    "build": "npm install"
   },
   "dependencies": {
-    "whatsapp-web.js": "1.23.0",
-    "qrcode-terminal": "0.12.0",
-    "puppeteer": "22.13.1",
-    "express": "4.19.2"
+    "express": "^4.21.2",
+    "puppeteer": "^22.15.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.34.2"
   },
-  "engines": {
-    "node": ">=18"
-  }
+ "engines": {
+  "node": "18.x"
+}
+
 }
