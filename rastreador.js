@@ -1,6 +1,6 @@
 // rastreador.js
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -8,17 +8,21 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Garante que o cache exista
-const cachePath = path.join(__dirname, '.wwebjs_cache');
+// Garante que o cache exista (já copiado)
+const cachePath = path.join(__dirname, '.wwebjs_auth');
 if (!fs.existsSync(cachePath)) {
     fs.mkdirSync(cachePath, { recursive: true });
 }
 
+// Pasta para salvar QR Code PNG
+const qrPath = path.join(__dirname, 'qrcode.png');
+
+// Rota padrão
 app.get('/', (req, res) => {
     res.send('✅ Servidor rastreador WhatsApp ativo e rodando.');
 });
 
-// Criação do cliente com cache de autenticação local
+// Criação do cliente com sessão persistente
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: 'default', dataPath: cachePath }),
     puppeteer: {
@@ -34,11 +38,16 @@ const client = new Client({
     }
 });
 
-// Exibe QR Code compacto
-client.on('qr', (qr) => {
-    console.clear();
-    console.log('📱 Escaneie o QR Code abaixo (modo pequeno):');
-    qrcode.generate(qr, { small: true });
+// QR Code em PNG (somente se não houver sessão)
+client.on('qr', async (qr) => {
+    try {
+        await qrcode.toFile(qrPath, qr, { type: 'png' });
+        console.clear();
+        console.log(`📱 QR Code gerado em PNG: ${qrPath}`);
+        console.log('Abra o PNG e escaneie com seu celular.');
+    } catch (err) {
+        console.error('Erro ao gerar QR Code PNG:', err);
+    }
 });
 
 // Confirmação de login bem-sucedido
