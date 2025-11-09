@@ -8,21 +8,32 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Garante que o cache exista (já copiado)
-const cachePath = path.join(__dirname, '.wwebjs_auth');
+// Caminho para cache de autenticação
+const cachePath = path.join(__dirname, '.wwebjs_cache');
 if (!fs.existsSync(cachePath)) {
     fs.mkdirSync(cachePath, { recursive: true });
 }
 
-// Pasta para salvar QR Code PNG
-const qrPath = path.join(__dirname, 'qrcode.png');
+// Caminho para o QR Code PNG
+const qrImagePath = path.join(__dirname, 'qrcode.png');
 
-// Rota padrão
+// Servidor simples para health check
 app.get('/', (req, res) => {
     res.send('✅ Servidor rastreador WhatsApp ativo e rodando.');
 });
 
-// Criação do cliente com sessão persistente
+app.get('/healthz', (req, res) => res.send('OK'));
+
+// Servir QR Code PNG
+app.get('/qrcode.png', (req, res) => {
+    if (fs.existsSync(qrImagePath)) {
+        res.sendFile(qrImagePath);
+    } else {
+        res.status(404).send('QR Code ainda não gerado.');
+    }
+});
+
+// Criação do cliente WhatsApp
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: 'default', dataPath: cachePath }),
     puppeteer: {
@@ -38,26 +49,26 @@ const client = new Client({
     }
 });
 
-// QR Code em PNG (somente se não houver sessão)
+// Evento QR Code: gera PNG e loga URL
 client.on('qr', async (qr) => {
     try {
-        await qrcode.toFile(qrPath, qr, { type: 'png' });
+        await qrcode.toFile(qrImagePath, qr, { type: 'png', width: 300 });
         console.clear();
-        console.log(`📱 QR Code gerado em PNG: ${qrPath}`);
-        console.log('Abra o PNG e escaneie com seu celular.');
+        console.log('📱 QR Code gerado em PNG. Abra no navegador do celular:');
+        console.log(`https://rastreador-whatsapp-v2.onrender.com/qrcode.png`);
     } catch (err) {
         console.error('Erro ao gerar QR Code PNG:', err);
     }
 });
 
-// Confirmação de login bem-sucedido
+// Evento pronto
 client.on('ready', () => {
     console.clear();
     console.log('✅ Conexão estabelecida com sucesso!');
     console.log('WhatsApp conectado e rastreador ativo.');
 });
 
-// Resposta a mensagens
+// Evento mensagem
 client.on('message', async (msg) => {
     if (msg.body.toLowerCase() === 'ping') {
         msg.reply('🏓 Pong! Servidor ativo.');
@@ -67,6 +78,5 @@ client.on('message', async (msg) => {
 // Inicializa cliente
 client.initialize();
 
-// Health check para Render
-app.get('/healthz', (req, res) => res.send('OK'));
+// Inicializa servidor
 app.listen(PORT, () => console.log(`🌐 Servidor web ativo na porta ${PORT}`));
