@@ -1,0 +1,12 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar cache do WhatsApp
+.wwebjs_auth/session/Default/Service\ Worker/
+.wwebjs_auth/session/Default/IndexedDB/
+.wwebjs_auth/session/Default/Local\ Storage/
+.wwebjs_auth/session/Default/CrashPad/
+.wwebjs_auth/session/Default/DevToolsActivePort
+
+# Ignorar logs
+*.log
